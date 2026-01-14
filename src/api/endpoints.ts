@@ -20,7 +20,7 @@ function buildQuery(params: Record<string, string | undefined>) {
 }
 
 export async function loginRequest(payload: { email: string; password: string }) {
-  const data = await apiFetch<{ user: User }>('/auth/login', {
+  const data = await apiFetch<{ user: User }>('/auth/admin/login', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
