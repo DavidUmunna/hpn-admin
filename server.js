@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 🔁 PROXY API → backend service
+// Proxy API calls to backend
 app.use(
   '/api',
   createProxyMiddleware({
@@ -18,11 +18,12 @@ app.use(
   })
 );
 
-// 📦 Serve Vite build
+// Serve Vite build output
 app.use(express.static(path.join(__dirname, 'dist')));
 
-app.get('*', (_, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+// Catch-all: return the SPA index.html (NO app.get('*'))
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 const port = process.env.PORT || 3000;
