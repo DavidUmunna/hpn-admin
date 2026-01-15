@@ -6,7 +6,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'hpnmobilebackend-production.up.railway.app',
+        target: 'https://hpnmobilebackend-production.up.railway.app',
+
         changeOrigin: true,
         secure: true,
       },
