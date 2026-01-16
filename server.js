@@ -8,21 +8,28 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Proxy API calls to backend
+/**
+ * 1️⃣ PROXY FIRST – must be before static + fallback
+ */
 app.use(
   '/api',
   createProxyMiddleware({
     target: 'https://hpnmobilebackend-production.up.railway.app',
     changeOrigin: true,
     secure: true,
+    logLevel: 'debug',              // 👈 add this for visibility
   })
 );
 
-// Serve Vite build output
+/**
+ * 2️⃣ STATIC FILES
+ */
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Catch-all: return the SPA index.html (NO app.get('*'))
-app.use((req, res) => {
+/**
+ * 3️⃣ SPA FALLBACK – LAST
+ */
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
