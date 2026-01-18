@@ -182,6 +182,7 @@ export default function UsersPage() {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Phone</th>
                 <th>Role</th>
                 <th>Joined</th>
                 <th>Actions</th>
@@ -190,21 +191,21 @@ export default function UsersPage() {
             <tbody>
               {usersQuery.isLoading && (
                 <tr>
-                  <td colSpan={5} className="muted">
+                  <td colSpan={6} className="muted">
                     Loading users...
                   </td>
                 </tr>
               )}
               {usersQuery.error && (
                 <tr>
-                  <td colSpan={5} className="alert error">
+                  <td colSpan={6} className="alert error">
                     {usersQuery.error instanceof Error ? usersQuery.error.message : 'Unable to load users'}
                   </td>
                 </tr>
               )}
               {!usersQuery.isLoading && !usersQuery.error && usersQuery.data?.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="muted">
+                  <td colSpan={6} className="muted">
                     No users found.
                   </td>
                 </tr>
@@ -213,6 +214,7 @@ export default function UsersPage() {
                 <tr key={user.id}>
                   <td>{user.name || 'N/A'}</td>
                   <td className="muted mono">{user.email}</td>
+                  <td className="muted small">{user.phone || 'N/A'}</td>
                   <td>
                     <Tag
                       label={user.role}

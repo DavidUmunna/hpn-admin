@@ -9,12 +9,19 @@ export type User = {
   createdAt?: string;
 };
 
+export type Dependent = {
+  id: string;
+  name: string;
+  age: number;
+};
+
 export type AttendanceRecord = {
   id: string;
   userId?: string;
   timestamp: string;
   day?: string;
   location?: { latitude: number; longitude: number };
+  dependents?: Dependent[];
 };
 
 export type AttendanceSummary = {
@@ -51,6 +58,25 @@ export type PrayerItem = {
   createdAt: string;
 };
 
+export type PrayerComment = {
+  id: string;
+  prayerId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+  isAuthor: boolean;
+};
+
+export type PrayerUser = {
+  id: string;
+  name: string;
+};
+
+export type PrayerUsers = {
+  count: number;
+  users: PrayerUser[];
+};
+
 export type NotificationItem = {
   id: string;
   title: string;
@@ -64,6 +90,36 @@ export type AdminOverview = {
   attendance: AttendanceSummary;
   eventsSummary: EventsSummary;
   users: User[];
+};
+
+export type SyncPayloadItem = {
+  key: string;
+  data?: Record<string, unknown>;
+  deviceUpdatedAt: string;
+  serverUpdatedAt?: string;
+};
+
+export type SyncItem = {
+  id: string;
+  key: string;
+  data: Record<string, unknown>;
+  deviceUpdatedAt: string;
+  serverUpdatedAt: string;
+  conflict?: boolean;
+  conflictReason?: string;
+};
+
+export type SyncConflict = {
+  key: string;
+  server: SyncItem;
+  device: SyncPayloadItem;
+  reason: string;
+};
+
+export type SyncResult = {
+  applied: SyncItem[];
+  conflicts: SyncConflict[];
+  serverSnapshot: SyncItem[];
 };
 
 export type ApiErrorPayload = {

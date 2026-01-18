@@ -36,7 +36,8 @@ a {
 }
 
 button,
-input {
+input,
+textarea {
   font-family: inherit;
 }
 
@@ -380,7 +381,8 @@ input {
   flex-wrap: wrap;
 }
 
-input {
+input,
+textarea {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
   border-radius: 10px;

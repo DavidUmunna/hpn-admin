@@ -4,10 +4,12 @@ import { useAuth } from '../auth/AuthContext';
 
 const links = [
   { to: '/', label: 'Overview' },
+  { to: '/attendance', label: 'Attendance' },
   { to: '/events', label: 'Events' },
   { to: '/prayers', label: 'Prayers' },
   { to: '/users', label: 'Users' },
   { to: '/notifications', label: 'Notifications' },
+  { to: '/tools', label: 'Tools' },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {

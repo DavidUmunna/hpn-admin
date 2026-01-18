@@ -4,12 +4,14 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { useState } from 'react';
 import Panel from '../components/Panel';
 import Tag from '../components/Tag';
-import { createEvent, fetchEvents } from '../api/endpoints';
+import { createEvent, fetchEventById, fetchEvents, toggleEventRsvp } from '../api/endpoints';
+import type { EventItem } from '../api/types';
 
 export default function EventsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [categoryInput, setCategoryInput] = useState('');
   const [filters, setFilters] = useState({ search: '', category: '' });
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -25,6 +27,12 @@ export default function EventsPage() {
   const eventsQuery = useQuery({
     queryKey: ['events', filters.search, filters.category],
     queryFn: () => fetchEvents(filters),
+  });
+
+  const eventDetailQuery = useQuery({
+    queryKey: ['event', selectedEventId],
+    queryFn: () => fetchEventById(selectedEventId as string),
+    enabled: Boolean(selectedEventId),
   });
 
   const queryClient = useQueryClient();
@@ -55,6 +63,18 @@ export default function EventsPage() {
     onError: (err: unknown) => {
       const message = err instanceof Error ? err.message : 'Unable to create event';
       setCreateError(message);
+    },
+  });
+
+  const toggleRsvpMutation = useMutation({
+    mutationFn: (eventId: string) => toggleEventRsvp(eventId),
+    onSuccess: ({ event }) => {
+      queryClient.setQueryData<EventItem[] | undefined>(['events', filters.search, filters.category], (prev) =>
+        prev?.map((item) => (item.id === event.id ? event : item))
+      );
+      if (selectedEventId === event.id) {
+        queryClient.setQueryData(['event', selectedEventId], event);
+      }
     },
   });
 
@@ -201,26 +221,28 @@ export default function EventsPage() {
                 <th>Schedule</th>
                 <th>Location</th>
                 <th>Attendees</th>
+                <th>Registered</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {eventsQuery.isLoading && (
                 <tr>
-                  <td colSpan={4} className="muted">
+                  <td colSpan={6} className="muted">
                     Loading events...
                   </td>
                 </tr>
               )}
               {eventsQuery.error && (
                 <tr>
-                  <td colSpan={4} className="alert error">
+                  <td colSpan={6} className="alert error">
                     {eventsQuery.error instanceof Error ? eventsQuery.error.message : 'Unable to load events'}
                   </td>
                 </tr>
               )}
               {!eventsQuery.isLoading && !eventsQuery.error && eventsQuery.data?.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="muted">
+                  <td colSpan={6} className="muted">
                     No events match the filters.
                   </td>
                 </tr>
@@ -251,12 +273,92 @@ export default function EventsPage() {
                       )}
                     </div>
                   </td>
+                  <td>
+                    <Tag label={event.isRegistered ? 'registered' : 'not registered'} tone={event.isRegistered ? 'success' : 'muted'} />
+                  </td>
+                  <td>
+                    <div className="pill">
+                      <button
+                        className="btn ghost tiny"
+                        type="button"
+                        onClick={() => setSelectedEventId((prev) => (prev === event.id ? null : event.id))}
+                      >
+                        {selectedEventId === event.id ? 'Hide' : 'Details'}
+                      </button>
+                      <button
+                        className="btn ghost tiny"
+                        type="button"
+                        onClick={() => toggleRsvpMutation.mutate(event.id)}
+                        disabled={toggleRsvpMutation.isPending}
+                      >
+                        {event.isRegistered ? 'Cancel RSVP' : 'RSVP'}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </Panel>
+
+      {selectedEventId && (
+        <Panel
+          title="Event details"
+          description="Loaded from /api/events/:id."
+          action={
+            <button className="btn ghost tiny" onClick={() => setSelectedEventId(null)}>
+              Close
+            </button>
+          }
+        >
+          {eventDetailQuery.isLoading && <p className="muted">Loading event details...</p>}
+          {eventDetailQuery.error && (
+            <p className="alert error">
+              {eventDetailQuery.error instanceof Error
+                ? eventDetailQuery.error.message
+                : 'Unable to load event details'}
+            </p>
+          )}
+          {eventDetailQuery.data && (
+            <div className="list">
+              <div className="list-item">
+                <div>Title</div>
+                <div className="muted small">{eventDetailQuery.data.title}</div>
+              </div>
+              <div className="list-item">
+                <div>Description</div>
+                <div className="muted small">{eventDetailQuery.data.description || 'No description'}</div>
+              </div>
+              <div className="list-item">
+                <div>Schedule</div>
+                <div className="muted small">
+                  {eventDetailQuery.data.startTime
+                    ? format(new Date(eventDetailQuery.data.startTime), 'MMM d, yyyy p')
+                    : 'TBD'}
+                  {eventDetailQuery.data.endTime ? ` -> ${format(new Date(eventDetailQuery.data.endTime), 'p')}` : ''}
+                </div>
+              </div>
+              <div className="list-item">
+                <div>Location</div>
+                <div className="muted small">{eventDetailQuery.data.location || 'N/A'}</div>
+              </div>
+              <div className="list-item">
+                <div>Category</div>
+                <div className="muted small">{eventDetailQuery.data.category || 'General'}</div>
+              </div>
+              <div className="list-item">
+                <div>Registered</div>
+                <div className="muted small">{eventDetailQuery.data.isRegistered ? 'Yes' : 'No'}</div>
+              </div>
+              <div className="list-item">
+                <div>Attendees</div>
+                <div className="muted small">{eventDetailQuery.data.attendeesCount || 0}</div>
+              </div>
+            </div>
+          )}
+        </Panel>
+      )}
     </div>
   );
 }

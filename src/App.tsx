@@ -6,6 +6,8 @@ import PrayersPage from './pages/PrayersPage';
 import UsersPage from './pages/UsersPage';
 import NotificationsPage from './pages/NotificationsPage';
 import LoginPage from './pages/LoginPage';
+import AttendancePage from './pages/AttendancePage';
+import ToolsPage from './pages/ToolsPage';
 import FullPageMessage from './components/FullPageMessage';
 import { useAuth } from './auth/AuthContext';
 
@@ -36,10 +38,12 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoutes />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/prayers" element={<PrayersPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/tools" element={<ToolsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
