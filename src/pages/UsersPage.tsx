@@ -63,6 +63,11 @@ export default function UsersPage() {
       setUpdateError(message);
     },
   });
+  const isValidDate = (value: string | undefined): boolean => {
+    if (!value) return false;
+    const d = new Date(value);
+    return !isNaN(d.getTime());
+  }
 
   const startEditing = (user: User) => {
     setEditingUserId(user.id);
@@ -222,7 +227,7 @@ export default function UsersPage() {
                     />
                   </td>
                   <td className="muted small">
-                    {user.createdAt ? format(new Date(user.createdAt), 'MMM d, yyyy') : 'N/A'}
+                   {isValidDate(user.createdAt)? format(new Date(user.createdAt), 'MMM d, yyyy'): 'N/A'}
                   </td>
                   <td>
                     {editingUserId === user.id ? (

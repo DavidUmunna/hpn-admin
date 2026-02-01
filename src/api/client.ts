@@ -11,7 +11,22 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE_URL ="/api" ;
+const rawApiUrl = import.meta.env.VITE_API_URL;
+
+if (!rawApiUrl) {
+  // Clear, actionable console message to avoid silent "undefined/..." requests
+  // which resolve as relative URLs to the frontend server.
+  // Developers: set VITE_API_URL in .env and restart the dev server.
+  // We keep a safe empty string so runtime code doesn't crash, but we warn loudly.
+  // Example .env: VITE_API_URL=http://localhost:4000/api
+  // Note: Vite only exposes env variables prefixed with VITE_.
+  // eslint-disable-next-line no-console
+  console.error(
+    'VITE_API_URL is not set. Requests will be sent to the frontend origin.\nSet VITE_API_URL in .env (prefixed with VITE_) and restart the dev server.'
+  );
+}
+
+export const API_BASE_URL = (rawApiUrl ?? '').replace(/\/\/+$/, '');
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
